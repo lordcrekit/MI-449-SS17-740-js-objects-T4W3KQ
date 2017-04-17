@@ -21,7 +21,8 @@ var jokes = {
 }
 
 // The message to display if the jokes object is empty
-var noJokesMessage = 'I... I don\'t know any jokes. 😢'
+var NO_JOKES_MESSAGE = 'I... I don\'t know any jokes. 😢'
+var JOKE_NOT_FOUND_MESSAGE = 'No matching joke found.'
 
 // -------------
 // PAGE UPDATERS
@@ -55,14 +56,20 @@ var requestedJokeInput = document.getElementById('requested-joke')
 var jokeBox = document.getElementById('joke-box')
 var updateDisplayedJoke = function () {
   var requestedJokeKey = requestedJokeInput.value
-  jokeBox.textContent = requestedJokeKey
+  var found = jokes[requestedJokeKey]
+  jokeBox.innerHTML = found 
+      ? '<p>'+superescape(found.setup)+'</p><p>'+superescape(found.punchline)+'</p>'
+      : JOKE_NOT_FOUND_MESSAGE
 }
+
+
 
 // Function to keep track of all other
 // page update functions, so that we
 // can call them all at once
 var updatePage = function () {
   updateJokesMenu()
+  updateDisplayedJoke()
 }
 
 // -------
