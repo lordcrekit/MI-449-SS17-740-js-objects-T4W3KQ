@@ -2,12 +2,6 @@
 // DATA
 // ----
 
-function loadJokes() {
-}
-
-function storeJokes() {
-}
-
 // A couple jokes to start with
 var jokes = {
   'the horse': {
@@ -18,6 +12,17 @@ var jokes = {
     setup: 'How does Orion keep his pants up?',
     punchline: 'With an asteroid belt.'
   }
+}
+
+function loadJokes() {
+  found = window.localStorage.getItem('jokes')
+  if (found) {
+    jokes = JSON.parse(found)
+  }
+}
+
+function storeJokes() {
+  window.localStorage.setItem('jokes', JSON.stringify(jokes))
 }
 
 // The message to display if the jokes object is empty
@@ -40,7 +45,6 @@ var updateJokesMenu = function () {
   for (joke in jokes) {
     var j = '<input type="button" onclick="setJoke(\''+superescape(joke)+'\')" value="'+joke+'"/>'
     joke2.push(j)
-    console.log(j)
   }
   var jokeKeyListItems = joke2.join('</li><li>') || noJokesMessage
   jokesMenuList.innerHTML = '<li>' + jokeKeyListItems + '</li>'
@@ -51,6 +55,27 @@ var setJoke = function(joke) {
   updateDisplayedJoke()
 }
 
+var newJokeButton = document.getElementById('new-joke')
+var newJokeTitleElement = document.getElementById('new-joke-title')
+var newJokeSetupElement = document.getElementById('new-joke-setup')
+var newJokePunchElement = document.getElementById('new-joke-punch')
+var storeNewJoke = function() {
+  if (!newJokeTitleElement.value || !newJokeSetupElement.value || !newJokePunchElement.value) {
+    window.alert('You must enter a value for every field!')
+    return
+  }
+  if (jokes[newJokeTitleElement.value]
+    && !window.confirm('Are you sure you want to override the existing joke?')) {
+    return
+  }
+  var newJoke = { setup: newJokeSetupElement.value, punchline: newJokePunchElement.value }
+  jokes[newJokeTitleElement.value] = newJoke
+
+  storeJokes()
+  updateJokesMenu()
+  updateDisplayedJoke()
+}
+
 // Update the displayed joke, based on the requested joke
 var requestedJokeInput = document.getElementById('requested-joke')
 var jokeBox = document.getElementById('joke-box')
@@ -58,8 +83,8 @@ var updateDisplayedJoke = function () {
   var requestedJokeKey = requestedJokeInput.value
   var found = jokes[requestedJokeKey]
   jokeBox.innerHTML = found 
-      ? '<p>'+superescape(found.setup)+'</p><p>'+superescape(found.punchline)+'</p>'
-      : JOKE_NOT_FOUND_MESSAGE
+    ? '<p>'+superescape(found.setup)+'</p><p>'+superescape(found.punchline)+'</p>'
+    : JOKE_NOT_FOUND_MESSAGE
 }
 
 
@@ -68,6 +93,7 @@ var updateDisplayedJoke = function () {
 // page update functions, so that we
 // can call them all at once
 var updatePage = function () {
+  loadJokes()
   updateJokesMenu()
   updateDisplayedJoke()
 }
@@ -84,6 +110,7 @@ updatePage()
 // ---------------
 
 // Keep the requested joke up-to-date
+newJokeButton.addEventListener('click', storeNewJoke)
 requestedJokeInput.addEventListener('input', updateDisplayedJoke)
 
 /**
@@ -99,7 +126,7 @@ function superescape(string) {
       case "'":
       case '\\':
         return '\\' + character
-      // Four possible LineTerminator characters need to be escaped:
+        // Four possible LineTerminator characters need to be escaped:
       case '\n':
         return '\\n'
       case '\r':
