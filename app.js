@@ -2,8 +2,6 @@
 // DATA
 // ----
 
-var data = {}
-
 function loadJokes() {
 }
 
@@ -36,8 +34,20 @@ var updateJokesMenu = function () {
   // You'll learn how to do advanced stuff like
   // this in a later lesson.
   var jokeKeys = Object.keys(jokes)
-  var jokeKeyListItems = jokeKeys.join('</li><li>') || noJokesMessage
+  // Now make them working buttons
+  var joke2 = []
+  for (joke in jokes) {
+    var j = '<input type="button" onclick="setJoke(\''+superescape(joke)+'\')" value="'+joke+'"/>'
+    joke2.push(j)
+    console.log(j)
+  }
+  var jokeKeyListItems = joke2.join('</li><li>') || noJokesMessage
   jokesMenuList.innerHTML = '<li>' + jokeKeyListItems + '</li>'
+}
+
+var setJoke = function(joke) {
+  document.getElementById('requested-joke').value=joke
+  updateDisplayedJoke()
 }
 
 // Update the displayed joke, based on the requested joke
@@ -53,7 +63,6 @@ var updateDisplayedJoke = function () {
 // can call them all at once
 var updatePage = function () {
   updateJokesMenu()
-  updateDisplayedJoke()
 }
 
 // -------
@@ -69,3 +78,29 @@ updatePage()
 
 // Keep the requested joke up-to-date
 requestedJokeInput.addEventListener('input', updateDisplayedJoke)
+
+/**
+ * Shamelessly taken from https://github.com/joliss/js-string-escape!
+ */
+function superescape(string) {
+  return ('' + string).replace(/["'\\\n\r\u2028\u2029]/g, function (character) {
+    // Escape all characters not included in SingleStringCharacters and
+    // DoubleStringCharacters on
+    // http://www.ecma-international.org/ecma-262/5.1/#sec-7.8.4
+    switch (character) {
+      case '"':
+      case "'":
+      case '\\':
+        return '\\' + character
+      // Four possible LineTerminator characters need to be escaped:
+      case '\n':
+        return '\\n'
+      case '\r':
+        return '\\r'
+      case '\u2028':
+        return '\\u2028'
+      case '\u2029':
+        return '\\u2029'
+    }
+  })
+}
