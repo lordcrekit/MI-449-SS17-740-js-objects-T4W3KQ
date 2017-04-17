@@ -3,7 +3,7 @@
 // ----
 
 // A couple jokes to start with
-var jokes = {
+var DEFAULT_JOKES = {
   'the horse': {
     setup: 'A horse walks into the bar. The bartender asks...',
     punchline: 'Why the long face?'
@@ -14,11 +14,13 @@ var jokes = {
   }
 }
 
+var jokes = []
+
 function loadJokes() {
   found = window.localStorage.getItem('jokes')
-  if (found) {
-    jokes = JSON.parse(found)
-  }
+  jokes = found && found.length > 0
+      ? JSON.parse(found)
+      : JSON.parse(JSON.stringify(DEFAULT_JOKES))
 }
 
 function storeJokes() {
@@ -46,7 +48,7 @@ var updateJokesMenu = function () {
     var j = '<input type="button" onclick="setJoke(\''+superescape(joke)+'\')" value="'+joke+'"/>'
     joke2.push(j)
   }
-  var jokeKeyListItems = joke2.join('</li><li>') || noJokesMessage
+  var jokeKeyListItems = joke2.join('</li><li>') || NO_JOKES_MESSAGE 
   jokesMenuList.innerHTML = '<li>' + jokeKeyListItems + '</li>'
 }
 
@@ -59,8 +61,7 @@ var newJokeButton = document.getElementById('new-joke')
 var newJokeTitleElement = document.getElementById('new-joke-title')
 var newJokeSetupElement = document.getElementById('new-joke-setup')
 var newJokePunchElement = document.getElementById('new-joke-punch')
-var storeNewJoke = function() {
-  if (!newJokeTitleElement.value || !newJokeSetupElement.value || !newJokePunchElement.value) {
+var storeNewJoke = function() { if (!newJokeTitleElement.value || !newJokeSetupElement.value || !newJokePunchElement.value) {
     window.alert('You must enter a value for every field!')
     return
   }
@@ -76,6 +77,23 @@ var storeNewJoke = function() {
   updateDisplayedJoke()
 }
 
+var forgetJokeButton = document.getElementById('forget-joke')
+var forgetJokeTitle = document.getElementById('forget-joke-title')
+var forgetJoke = function() {
+  if (!forgetJokeTitle.value) {
+    window.alert('What should I forget?')
+    return
+  }
+  if (!jokes[forgetJokeTitle.value]) {
+    window.alert('I can\'t forget what I don\'t know!')
+    return
+  }
+  delete jokes[forgetJokeTitle.value]
+  storeJokes()
+  updateJokesMenu()
+  updateDisplayedJoke()
+}
+
 // Update the displayed joke, based on the requested joke
 var requestedJokeInput = document.getElementById('requested-joke')
 var jokeBox = document.getElementById('joke-box')
@@ -86,8 +104,6 @@ var updateDisplayedJoke = function () {
     ? '<p>'+superescape(found.setup)+'</p><p>'+superescape(found.punchline)+'</p>'
     : JOKE_NOT_FOUND_MESSAGE
 }
-
-
 
 // Function to keep track of all other
 // page update functions, so that we
@@ -112,6 +128,7 @@ updatePage()
 // Keep the requested joke up-to-date
 newJokeButton.addEventListener('click', storeNewJoke)
 requestedJokeInput.addEventListener('input', updateDisplayedJoke)
+forgetJokeButton.addEventListener('click', forgetJoke)
 
 /**
  * Shamelessly taken from https://github.com/joliss/js-string-escape!
