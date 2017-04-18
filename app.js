@@ -14,7 +14,7 @@ var DEFAULT_JOKES = {
   }
 }
 
-var jokes = []
+var jokes
 
 function loadJokes() {
   found = window.localStorage.getItem('jokes')
@@ -73,6 +73,9 @@ var storeNewJoke = function() { if (!newJokeTitleElement.value || !newJokeSetupE
   jokes[newJokeTitleElement.value] = newJoke
 
   storeJokes()
+  newJokeTitleElement.value = ''
+  newJokeSetupElement.value = ''
+  newJokePunchElement.value = ''
   updateJokesMenu()
   updateDisplayedJoke()
 }
@@ -89,7 +92,9 @@ var forgetJoke = function() {
     return
   }
   delete jokes[forgetJokeTitle.value]
+
   storeJokes()
+  forgetJokeTitle.value = ''
   updateJokesMenu()
   updateDisplayedJoke()
 }
